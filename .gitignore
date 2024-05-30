@@ -1,0 +1,9 @@
+.venv/
+node_modules/
+
+.auth/
+.wwebjs_cache/
+
+whatsapp-web.js/
+
+.DS_Store
