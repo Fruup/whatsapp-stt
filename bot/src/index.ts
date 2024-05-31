@@ -90,6 +90,7 @@ client.on("qr", async (qr) => {
       await mailer.sendMail({
         from: config.sourceMail,
         to: config.targetEmail,
+        subject: "WhatsApp STT - QR Code 🔑",
         html,
       })
 
@@ -168,17 +169,3 @@ client.on("message_create", async (msg) => {
 
 // Start your client
 client.initialize()
-
-if (!config.dev) {
-  Bun.serve({
-    port: config.port,
-    fetch() {
-      return new Response("ok", { status: 200 })
-    },
-
-    // @ts-ignore
-    websocket: undefined,
-  })
-
-  console.log(`HTTP Server started on port ${config.port} 🌐`)
-}

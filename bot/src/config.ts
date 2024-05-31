@@ -1,3 +1,5 @@
+let errors: string[] = []
+
 export const config = {
   openAIApiKey: getEnv("OPENAI_API_KEY"),
   dataPath: getEnv("DATA_PATH", ".auth"),
@@ -10,11 +12,9 @@ export const config = {
   smtpPort: getEnv("SOURCE_MAIL_PORT", "465"),
   mailRetries: parseInt(getEnv("MAIL_RETRIES", "3")),
   qrRetries: parseInt(getEnv("QR_RETRIES", "10")),
-  dev: getEnv("NODE_ENV") !== "production",
+  dev: getEnv("NODE_ENV", "development") !== "production",
   port: parseInt(getEnv("PORT", "8080")),
 }
-
-let errors: string[] = []
 
 if (errors.length) {
   console.error(errors.join("\n"))

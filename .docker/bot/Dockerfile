@@ -14,11 +14,14 @@ RUN apt install -y gconf-service libgbm-dev libasound2 libatk1.0-0 libc6 libcair
 
 # Install dependencies
 ADD bot/package.json bot/bun.lockb ./
-RUN bun run prepare
 RUN bun install --no-save --production
 
 # Add sources and run
 ADD bot/src src/
+
+RUN useradd -m user
+RUN chmod -R 777 /app
+USER user
 
 ENV NODE_ENV production
 

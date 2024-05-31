@@ -1,0 +1,24 @@
+# fly.toml app configuration file generated for whatsapp-stt on 2024-05-31T22:35:18+09:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'whatsapp-stt'
+primary_region = 'ams'
+# services.auto_stop_machines = false
+
+[build]
+  image = 'fruup/whatsapp-stt:latest'
+
+[[vm]]
+  memory = '2gb'
+  cpu_kind = 'shared'
+  cpus = 1
+
+[env]
+  TARGET_CHAT_ID = "120363040057926701@g.us"
+
+  TARGET_MAIL = "scherer-leon@web.de"
+
+  SOURCE_MAIL_HOST = "smtp.titan.email"
+  SOURCE_MAIL = "info@leonscherer.com"

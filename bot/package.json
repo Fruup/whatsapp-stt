@@ -17,9 +17,6 @@
     "openai": "^4.47.2",
     "qr-image": "^3.2.0",
     "svg-to-dataurl": "^1.0.0",
-    "whatsapp-web.js": "./whatsapp-web.js"
-  },
-  "scripts": {
-    "prepare": "rm -rf ./whatsapp-web.js && git clone https://github.com/pedroslopez/whatsapp-web.js whatsapp-web.js && cd whatsapp-web.js && git checkout origin/webpack-exodus"
+    "whatsapp-web.js": "github:pedroslopez/whatsapp-web.js#webpack-exodus"
   }
 }
