@@ -15,12 +15,20 @@ import { config } from "./config"
 const mailer = createTransport({
   host: config.smtpHost,
   port: parseInt(config.smtpPort),
-  secure: true,
+  secure: false,
   auth: {
     user: config.sourceMail,
     pass: config.sourceMailPassword,
   },
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 10000,
+  dnsTimeout: 10000,
 })
+
+console.log("Verifying mailer...")
+await mailer.verify()
+console.log("Done!")
 
 const openai = new OpenAI({
   apiKey: config.openAIApiKey,
@@ -47,7 +55,8 @@ let targetChat: Chat
 // When the client is ready, run this code (only once)
 client.once("ready", async () => {
   targetChat = await client.getChatById(config.targetChatId)
-  console.log("Target chat is set. Client ready 🚀")
+  console.log("Target chat is set.")
+  console.log("Ready for action 🚀")
 })
 
 // When the client received QR-Code
@@ -60,11 +69,12 @@ client.on("qr", async (qr) => {
 
   qrRetries++
 
-  console.log("QR received 💡 Sending via mail...")
+  console.log(
+    `QR received (${qrRetries}/${config.qrRetries}) 💡 Sending via mail...`
+  )
 
   const svgCode = imageSync(qr, { type: "svg" })
   const path = svgToDataUrl(svgCode.toString("utf-8"))
-
   const html = `
     <head>
       <style>

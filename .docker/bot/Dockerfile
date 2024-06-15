@@ -5,7 +5,6 @@ WORKDIR /app
 RUN apt upgrade -y
 RUN apt update -y
 
-# Download whatsapp-web.js because bun install fails doing it.
 RUN apt install -y git
 
 # Install puppeteer dependencies
@@ -25,5 +24,4 @@ USER user
 
 ENV NODE_ENV production
 
-ENTRYPOINT [ "bun" ]
-CMD [ "run", "./src" ]
+CMD bun run ./src/index.ts
