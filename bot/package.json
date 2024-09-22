@@ -16,7 +16,7 @@
     "openai": "^4.47.2",
     "qr-image": "^3.2.0",
     "svg-to-dataurl": "^1.0.0",
-    "whatsapp-web.js": "github:pedroslopez/whatsapp-web.js#webpack-exodus",
+    "whatsapp-web.js": "^1.26.0",
     "qrcode-terminal": "^0.12.0"
   }
 }
