@@ -48,6 +48,7 @@ const client = new Client({
         headless: true,
         executablePath: "chromium",
       },
+  qrMaxRetries: config.qrRetries,
 })
 
 let targetChat: Chat
@@ -62,11 +63,6 @@ client.once("ready", async () => {
 // When the client received QR-Code
 let qrRetries = 0
 client.on("qr", async (qr) => {
-  if (qrRetries >= config.qrRetries) {
-    console.error(`QR retries exceeded (${config.qrRetries}). Exiting...`)
-    process.exit(1)
-  }
-
   qrRetries++
 
   console.log(

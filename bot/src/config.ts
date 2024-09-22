@@ -11,7 +11,7 @@ export const config = {
   smtpHost: getEnv("SOURCE_MAIL_HOST"),
   smtpPort: getEnv("SOURCE_MAIL_PORT", "465"),
   mailRetries: parseInt(getEnv("MAIL_RETRIES", "3")),
-  qrRetries: parseInt(getEnv("QR_RETRIES", "10")),
+  qrRetries: parseInt(getEnv("QR_RETRIES", "3")),
   dev: getEnv("NODE_ENV", "development") !== "production",
   port: parseInt(getEnv("PORT", "8080")),
 }
