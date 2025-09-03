@@ -135,16 +135,9 @@ client.on("message_create", async (msg) => {
     const medium = await msg.downloadMedia()
     const data = Buffer.from(medium.data, "base64")
     const filename = msg.id._serialized + ".ogg"
-    const file = new File(
-      [
-        // @ts-expect-error
-        data,
-      ],
-      filename,
-      {
-        type: medium.mimetype,
-      }
-    )
+    const file = new File([data], filename, {
+      type: medium.mimetype,
+    })
 
     const contactPromise = msg.getContact().catch((e) => {
       console.error(e)
