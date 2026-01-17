@@ -7,3 +7,5 @@ node_modules/
 whatsapp-web.js/
 
 .DS_Store
+
+test-data/

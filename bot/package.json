@@ -1,6 +1,6 @@
 {
-  "name": "bot",
-  "module": "index.ts",
+  "name": "@whatsapp-stt/bot",
+  "main": "src/index.ts",
   "type": "module",
   "devDependencies": {
     "@types/bun": "^1.3.6",

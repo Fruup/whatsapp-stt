@@ -1,0 +1,8 @@
+{
+  "name": "whatsapp-stt",
+  "private": true,
+  "workspaces": [
+    "bot",
+    "web"
+  ]
+}
