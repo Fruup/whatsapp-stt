@@ -11,4 +11,4 @@ export const handle: Handle = async ({ event, resolve }) => {
 	return resolve(event)
 }
 
-await botStore.initialize()
+// await botStore.initialize()

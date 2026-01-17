@@ -4,7 +4,7 @@ import { db } from '../db'
 import { getRequestEvent } from '$app/server'
 
 export const sessionStore = {
-	getOrThrow: async (token: string) => {
+	getOrThrow: async (token: string): Promise<Session> => {
 		const { locals } = getRequestEvent()
 
 		if (locals.session && locals.session.id === token) return locals.session
@@ -34,4 +34,10 @@ export const sessionStore = {
 
 		return session
 	},
+}
+
+export interface Session extends RecordModel {
+	status: 'connected' | 'disconnected' | null
+	model: string | null
+	targetChatId: string | null
 }

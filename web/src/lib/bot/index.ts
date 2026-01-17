@@ -25,6 +25,9 @@ export const botStore = {
 	getBot(sessionToken: string): WhatsAppSTTBot | null {
 		return bots.get(sessionToken) || null
 	},
+	setBot(sessionToken: string, bot: WhatsAppSTTBot) {
+		bots.set(sessionToken, bot)
+	},
 	async startBot(sessionToken: string) {
 		if (bots.has(sessionToken)) {
 			throw new Error('Bot already started for this session')

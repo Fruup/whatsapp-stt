@@ -21,6 +21,7 @@ export class WhatsAppSTTBot {
         targetChatId: string
         allowAudioMessages: boolean
       }>
+      onDisconnected: () => any
     }
   ) {
     this.#openai = new OpenAI({
@@ -42,6 +43,11 @@ export class WhatsAppSTTBot {
       },
       qrMaxRetries: 5,
       // TODO: pairWithPhoneNumber
+    })
+
+    this.#client.on("disconnected", () => {
+      this.#status = "disconnected"
+      this.options.onDisconnected()
     })
   }
 

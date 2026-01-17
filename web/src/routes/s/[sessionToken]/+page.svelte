@@ -6,15 +6,37 @@
 		getSession,
 		updateTargetChat,
 	} from '$lib/sessions/functions.remote'
+	import { createSessionMessageReceiver } from '../../api/v1/session'
+	import QRCode from 'qrcode'
+	import type { Session } from '$lib/sessions'
 
 	const sessionToken = $derived(page.params.sessionToken!)
-	const getSessionQuery = $derived(getSession({ sessionToken }))
-	const session = $derived(await getSessionQuery)
+	// const getSessionQuery = $derived(getSession({ sessionToken }))
+
+	let session = $state<Session>()
+	let qrCodeUrl = $state<string | null>(null)
+	let status = $state<'pending' | 'authenticated'>('pending')
+
+	$effect(() =>
+		createSessionMessageReceiver(sessionToken, {
+			async qrCode({ value }) {
+				console.log('QR Code:', value)
+
+				qrCodeUrl = await QRCode.toDataURL(value)
+			},
+			successfullyAuthenticated() {
+				status = 'authenticated'
+			},
+			updatedSession(updatedSession) {
+				session = updatedSession
+			},
+		}),
+	)
 
 	let targetChatId = $state<string>()
 
 	$effect(() => {
-		targetChatId = session.targetChatId ?? undefined
+		// targetChatId = session.targetChatId ?? undefined
 	})
 
 	watch(
@@ -34,13 +56,27 @@
 	Session token: {sessionToken}
 </div>
 
+{#if status === 'pending'}
+	<div class="my-8">
+		<img class="size-64" src={qrCodeUrl} alt="QR Code" />
+	</div>
+{:else if status === 'authenticated'}
+	<div class="my-8">
+		<span class="text-green-600 font-bold">Session authenticated!</span>
+	</div>
+{/if}
+
 <svelte:boundary>
 	{#snippet failed(e)}
 		<div>Failed to load session.</div>
 		<pre>{e}</pre>
 	{/snippet}
 
-	<div>
+	{#if session}
+		targetChatId: {session.targetChatId}
+	{/if}
+
+	<!-- <div>
 		<label>
 			Select Chat:
 
@@ -69,5 +105,5 @@
 		>
 			Create new transcription chat
 		</button>
-	</div>
+	</div> -->
 </svelte:boundary>
