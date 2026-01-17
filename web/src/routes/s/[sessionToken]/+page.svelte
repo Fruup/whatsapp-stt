@@ -1,7 +1,11 @@
 <script lang="ts">
 	import { watch } from 'runed'
 	import { page } from '$app/state'
-	import { getSession, updateTargetChat } from '$lib/sessions/functions.remote'
+	import {
+		createTranscriptionChat,
+		getSession,
+		updateTargetChat,
+	} from '$lib/sessions/functions.remote'
 
 	const sessionToken = $derived(page.params.sessionToken!)
 	const getSessionQuery = $derived(getSession({ sessionToken }))
@@ -46,5 +50,24 @@
 				{/each}
 			</select>
 		</label>
+
+		<button
+			onclick={async (e) => {
+				const el = e.target as HTMLButtonElement
+
+				el.disabled = true
+
+				try {
+					await createTranscriptionChat({ sessionToken })
+					await getSessionQuery.refresh()
+				} catch (e) {
+					console.error(e)
+				} finally {
+					el.disabled = false
+				}
+			}}
+		>
+			Create new transcription chat
+		</button>
 	</div>
 </svelte:boundary>

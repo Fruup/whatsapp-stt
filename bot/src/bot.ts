@@ -53,6 +53,19 @@ export class WhatsAppSTTBot {
     return await this.#client.getChats()
   }
 
+  async createTranscriptionChat() {
+    const name = "Transcription Chat 📝"
+
+    const chats = await this.getChats()
+    const foundChat = chats.find((chat) => chat.name === name)
+    if (foundChat) return foundChat.id._serialized
+
+    const result = await this.#client.createGroup(name)
+
+    if (typeof result === "string") return result
+    return result.gid._serialized
+  }
+
   async initializeAndAuthenticate() {
     const client = this.#client
 

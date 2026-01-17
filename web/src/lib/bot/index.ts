@@ -13,6 +13,8 @@ export const botStore = {
 			sessions.map(async (session) => {
 				const sessionToken = session.id
 
+				console.log('Initializing bot for session', sessionToken)
+
 				if (bots.has(sessionToken)) return
 
 				// TODO: Now that I think of it, maybe starting a bot for each session consumes too much memory :/

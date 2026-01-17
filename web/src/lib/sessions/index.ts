@@ -1,9 +1,14 @@
 import { ClientResponseError, type RecordModel } from 'pocketbase'
 import { error } from '@sveltejs/kit'
 import { db } from '../db'
+import { getRequestEvent } from '$app/server'
 
 export const sessionStore = {
 	getOrThrow: async (token: string) => {
+		const { locals } = getRequestEvent()
+
+		if (locals.session && locals.session.id === token) return locals.session
+
 		const session = await db
 			.collection<
 				{
@@ -23,6 +28,10 @@ export const sessionStore = {
 			})
 
 		if (!session) throw error(401, 'Invalid session token')
+
+		// Store session for further use
+		locals.session = session
+
 		return session
 	},
 }

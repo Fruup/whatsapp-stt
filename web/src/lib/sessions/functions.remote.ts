@@ -59,3 +59,23 @@ export const updateTargetChat = command(
 		})
 	},
 )
+
+export const createTranscriptionChat = command(
+	v.object({
+		sessionToken: v.string(),
+	}),
+	async ({ sessionToken }) => {
+		// await rateLimit({
+		// 	key: 'createTranscriptionChat',
+		// 	windowInSeconds: 1,
+		// 	bucketSize: 1,
+		// })
+
+		const bot = botStore.getBot(sessionToken)
+		if (!bot) throw error(400, 'Bot not found for this session')
+		if (bot.status !== 'connected') throw error(400, 'Bot not connected')
+
+		const chatId = await bot.createTranscriptionChat()
+		await updateTargetChat({ sessionToken, targetChatId: chatId })
+	},
+)
