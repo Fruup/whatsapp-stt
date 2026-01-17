@@ -1,3 +1,4 @@
+import { db } from '$lib/db'
 import { sessionStore } from '$lib/sessions'
 import { WhatsAppSTTBot } from '@whatsapp-stt/bot'
 import QRCode from 'qrcode'
@@ -5,6 +6,20 @@ import QRCode from 'qrcode'
 const bots = new Map<string, WhatsAppSTTBot>()
 
 export const botStore = {
+	async initialize() {
+		const sessions = await db.collection('sessions').getFullList()
+
+		await Promise.all(
+			sessions.map(async (session) => {
+				const sessionToken = session.id
+
+				if (bots.has(sessionToken)) return
+
+				// TODO: Now that I think of it, maybe starting a bot for each session consumes too much memory :/
+				await this.startBot(sessionToken)
+			}),
+		)
+	},
 	getBot(sessionToken: string): WhatsAppSTTBot | null {
 		return bots.get(sessionToken) || null
 	},
@@ -14,7 +29,6 @@ export const botStore = {
 		}
 
 		const bot = new WhatsAppSTTBot({
-			model: 'Systran/faster-whisper-medium',
 			clientId: sessionToken,
 			async onQrCode(qr) {
 				console.log('QR Code for session', sessionToken, qr)
@@ -29,6 +43,7 @@ export const botStore = {
 				return {
 					targetChatId: session.targetChatId,
 					allowAudioMessages: true, // TODO: Make configurable
+					model: 'Systran/faster-whisper-medium', // TODO: Make configurable
 				}
 			},
 		})

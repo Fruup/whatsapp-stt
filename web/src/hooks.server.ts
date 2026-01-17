@@ -1,3 +1,4 @@
+import { botStore } from '$lib/bot'
 import { rateLimit } from '$lib/server/rateLimit'
 import type { Handle } from '@sveltejs/kit'
 
@@ -9,3 +10,5 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	return resolve(event)
 }
+
+await botStore.initialize()

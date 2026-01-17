@@ -12,8 +12,12 @@ export class WhatsAppSTTBot {
     public readonly options: {
       clientId: string
       onQrCode: (qr: string) => any
-      model: "Systran/faster-whisper-medium"
+      /**
+       * Called before processing each message.
+       * THe config is to be fetched from the database.
+       */
       getConfig: () => Promise<{
+        model: "Systran/faster-whisper-medium"
         targetChatId: string
         allowAudioMessages: boolean
       }>
@@ -78,7 +82,7 @@ export class WhatsAppSTTBot {
       try {
         if (msg.broadcast) return
 
-        const { targetChatId, allowAudioMessages } =
+        const { targetChatId, allowAudioMessages, model } =
           await this.options.getConfig()
 
         if (
@@ -105,7 +109,7 @@ export class WhatsAppSTTBot {
           }),
           this.#openai.audio.transcriptions.create({
             file,
-            model: this.options.model,
+            model,
             language: "de",
           }),
           this.#client.getChatById(targetChatId),
