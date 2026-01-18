@@ -1,7 +1,7 @@
-import { defineConfig } from 'unocss';
+import { defineConfig } from 'unocss'
 
 export default defineConfig({
 	content: {
-		filesystem: ['./src/**/*.{svelte,html}']
-	}
-});
+		filesystem: ['./src/**/*.{svelte,html}'],
+	},
+})

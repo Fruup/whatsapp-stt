@@ -1,5 +1,5 @@
 import OpenAI from "openai"
-import WhatsAppWeb from "whatsapp-web.js"
+import WhatsAppWeb, { type Chat, type GroupChat } from "whatsapp-web.js"
 
 const { LocalAuth, MessageTypes, Client: WhatsAppWebClient } = WhatsAppWeb
 
@@ -17,6 +17,7 @@ export class WhatsAppSTTBot {
        * THe config is to be fetched from the database.
        */
       getConfig: () => Promise<{
+        active: boolean
         model: "Systran/faster-whisper-medium"
         targetChatId: string
         allowAudioMessages: boolean
@@ -63,13 +64,31 @@ export class WhatsAppSTTBot {
     const name = "Transcription Chat 📝"
 
     const chats = await this.getChats()
-    const foundChat = chats.find((chat) => chat.name === name)
+    const foundChat = chats.find(
+      (chat) =>
+        isGroupChat(chat) && chat.participants.length > 0 && chat.name === name
+    )
     if (foundChat) return foundChat.id._serialized
 
     const result = await this.#client.createGroup(name)
 
-    if (typeof result === "string") return result
-    return result.gid._serialized
+    const groupChatId =
+      typeof result === "string" ? result : result.gid._serialized
+
+    // Send welcome message
+    await this.#client.sendMessage(
+      groupChatId,
+      `Hi! Hier wirst du die Transkriptionen deiner Voice Memos sehen. 🦆\n` +
+        `⚙️ Verlier den Link für deine Einstellungen nicht:\n\n` +
+        `https://example.com/s/${this.options.clientId}`,
+      // TODO: real link
+      {
+        // HACK: see below
+        sendSeen: false,
+      }
+    )
+
+    return groupChatId
   }
 
   async initializeAndAuthenticate() {
@@ -101,8 +120,10 @@ export class WhatsAppSTTBot {
       try {
         if (msg.broadcast) return
 
-        const { targetChatId, allowAudioMessages, model } =
+        const { active, targetChatId, allowAudioMessages, model } =
           await this.options.getConfig()
+
+        if (!active) return
 
         if (
           !(
@@ -140,14 +161,13 @@ export class WhatsAppSTTBot {
             } ` + `(${contact.number})`
           : "???"
 
-        // msg.timestamp is not useful...
-
         const messageToBeSent =
-          `_${from}_` +
-          `\n` +
-          `${new Date().toISOString()}` +
+          `*${from}* am _${new Intl.DateTimeFormat("de-DE", {
+            dateStyle: "medium",
+            timeStyle: "medium",
+          }).format(1000 * msg.timestamp || new Date())}_:` +
           `\n\n` +
-          `${response.text}`
+          `${response.text || "_(Stille)_"}`
 
         await targetChat.sendMessage(messageToBeSent, {
           // HACK: https://github.com/pedroslopez/whatsapp-web.js/issues/5718#issuecomment-3750233653
@@ -167,3 +187,5 @@ export class WhatsAppSTTBot {
     return promise
   }
 }
+
+const isGroupChat = (chat: Chat): chat is GroupChat => chat.isGroup === true

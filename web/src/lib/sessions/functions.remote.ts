@@ -36,27 +36,30 @@ export const getSession = query(
 	},
 )
 
-export const updateTargetChat = command(
+export const updateSession = command(
 	v.object({
 		sessionToken: v.string(),
-		targetChatId: v.string(),
+		data: v.object({
+			active: v.optional(v.boolean()),
+			targetChatId: v.optional(v.nullable(v.string())),
+			allowAudioMessages: v.optional(v.boolean()),
+		}),
 	}),
-	async ({ sessionToken, targetChatId }) => {
-		// await rateLimit({
-		// 	key: 'getChatOptions',
-		// 	windowInSeconds: 60,
-		// 	bucketSize: 5,
-		// })
+	async ({ sessionToken, data }) => {
+		await rateLimit('updateSession', [
+			{
+				windowInSeconds: 1,
+				bucketSize: 1,
+			},
+			{
+				windowInSeconds: 60,
+				bucketSize: 30,
+			},
+		])
 
 		await sessionStore.getOrThrow(sessionToken)
 
-		const bot = botStore.getBot(sessionToken)
-		if (!bot) throw error(400, 'Bot not found for this session')
-		if (bot.status !== 'connected') throw error(400, 'Bot not connected')
-
-		await db.collection('sessions').update(sessionToken, {
-			targetChatId,
-		})
+		await db.collection('sessions').update(sessionToken, data)
 	},
 )
 
@@ -76,6 +79,6 @@ export const createTranscriptionChat = command(
 		if (bot.status !== 'connected') throw error(400, 'Bot not connected')
 
 		const chatId = await bot.createTranscriptionChat()
-		await updateTargetChat({ sessionToken, targetChatId: chatId })
+		await updateSession({ sessionToken, data: { targetChatId: chatId } })
 	},
 )

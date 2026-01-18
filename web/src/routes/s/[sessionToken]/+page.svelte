@@ -1,17 +1,11 @@
 <script lang="ts">
-	import { watch } from 'runed'
 	import { page } from '$app/state'
-	import {
-		createTranscriptionChat,
-		getSession,
-		updateTargetChat,
-	} from '$lib/sessions/functions.remote'
-	import { createSessionMessageReceiver } from '../../api/v1/session'
+	import { createTranscriptionChat, updateSession } from '$lib/sessions/functions.remote'
+	import { createSessionMessageReceiver } from '$routes/api/v1/session'
 	import QRCode from 'qrcode'
 	import type { Session } from '$lib/sessions'
 
 	const sessionToken = $derived(page.params.sessionToken!)
-	// const getSessionQuery = $derived(getSession({ sessionToken }))
 
 	let session = $state<Session>()
 	let qrCodeUrl = $state<string | null>(null)
@@ -33,23 +27,14 @@
 		}),
 	)
 
-	let targetChatId = $state<string>()
+	const updateSession2 = async () => {
+		if (!session) return
 
-	$effect(() => {
-		// targetChatId = session.targetChatId ?? undefined
-	})
-
-	watch(
-		() => targetChatId,
-		(targetChatId) => {
-			console.log({ targetChatId })
-
-			if (!targetChatId) return
-
-			updateTargetChat({ sessionToken, targetChatId })
-		},
-		{ lazy: true },
-	)
+		await updateSession({
+			sessionToken,
+			data: session,
+		})
+	}
 </script>
 
 <div class="font-bold my-8">
@@ -73,37 +58,36 @@
 	{/snippet}
 
 	{#if session}
-		targetChatId: {session.targetChatId}
+		<div>
+			{#if session.targetChatId?.length}
+				<span>Target chat set ✅</span>
+			{/if}
+
+			<button
+				onclick={async (e) => {
+					const el = e.target as HTMLButtonElement
+
+					el.disabled = true
+
+					try {
+						await createTranscriptionChat({ sessionToken })
+					} catch (e) {
+						console.error(e)
+					} finally {
+						el.disabled = false
+					}
+				}}
+			>
+				Create new transcription chat
+			</button>
+		</div>
+
+		<div>
+			<label>
+				Active?
+
+				<input type="checkbox" bind:checked={session.active} onchange={updateSession2} />
+			</label>
+		</div>
 	{/if}
-
-	<!-- <div>
-		<label>
-			Select Chat:
-
-			<select bind:value={targetChatId}>
-				{#each session.chatOptions as item}
-					<option value={item.id}>{item.name}</option>
-				{/each}
-			</select>
-		</label>
-
-		<button
-			onclick={async (e) => {
-				const el = e.target as HTMLButtonElement
-
-				el.disabled = true
-
-				try {
-					await createTranscriptionChat({ sessionToken })
-					await getSessionQuery.refresh()
-				} catch (e) {
-					console.error(e)
-				} finally {
-					el.disabled = false
-				}
-			}}
-		>
-			Create new transcription chat
-		</button>
-	</div> -->
 </svelte:boundary>

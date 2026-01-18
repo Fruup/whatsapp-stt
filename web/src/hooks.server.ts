@@ -3,7 +3,7 @@ import { rateLimit } from '$lib/server/rateLimit'
 import type { Handle } from '@sveltejs/kit'
 
 export const handle: Handle = async ({ event, resolve }) => {
-	await rateLimit({
+	await rateLimit('global', {
 		windowInSeconds: 1,
 		bucketSize: 5,
 	})

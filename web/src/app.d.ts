@@ -1,13 +1,12 @@
 // See https://svelte.dev/docs/kit/types#app.d.ts
+
+import type { Session } from '$lib/sessions'
+
 // for information about these interfaces
 declare global {
 	namespace App {
 		interface Locals {
-			session?: import('pocketbase').RecordModel & {
-				status: 'connected' | 'disconnected' | null
-				model: string | null
-				targetChatId: string | null
-			}
+			session?: Session
 		}
 
 		// interface Error {}

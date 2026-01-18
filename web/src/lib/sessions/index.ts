@@ -10,13 +10,7 @@ export const sessionStore = {
 		if (locals.session && locals.session.id === token) return locals.session
 
 		const session = await db
-			.collection<
-				{
-					status: 'connected' | 'disconnected' | null
-					model: string | null
-					targetChatId: string | null
-				} & RecordModel
-			>('sessions')
+			.collection<Session>('sessions')
 			.getOne(token)
 			.catch((e) => {
 				if (e instanceof ClientResponseError) {
@@ -37,6 +31,7 @@ export const sessionStore = {
 }
 
 export interface Session extends RecordModel {
+	active: boolean
 	status: 'connected' | 'disconnected' | null
 	model: string | null
 	targetChatId: string | null

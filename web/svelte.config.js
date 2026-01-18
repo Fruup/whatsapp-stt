@@ -15,6 +15,11 @@ const config = {
 		experimental: {
 			remoteFunctions: true,
 		},
+		alias: {
+			$lib: './src/lib',
+			$components: './src/components',
+			$routes: './src/routes',
+		},
 	},
 
 	compilerOptions: {
