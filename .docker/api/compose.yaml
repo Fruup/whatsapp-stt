@@ -16,3 +16,4 @@ services:
 
 volumes:
   hf-hub-cache:
+    external: true
