@@ -1,9 +1,13 @@
 <script lang="ts">
 	import { page } from '$app/state'
-	import { createTranscriptionChat, updateSession } from '$lib/sessions/functions.remote'
+	import {
+		createTranscriptionChat,
+		updateSession as updateSession_,
+	} from '$lib/sessions/functions.remote'
 	import { createSessionMessageReceiver } from '$routes/api/v1/session'
 	import QRCode from 'qrcode'
 	import type { Session } from '$lib/sessions'
+	import { LoaderCircleIcon } from '@lucide/svelte'
 
 	const sessionToken = $derived(page.params.sessionToken!)
 
@@ -27,10 +31,10 @@
 		}),
 	)
 
-	const updateSession2 = async () => {
+	const updateSession = async () => {
 		if (!session) return
 
-		await updateSession({
+		await updateSession_({
 			sessionToken,
 			data: session,
 		})
@@ -42,9 +46,13 @@
 </div>
 
 {#if status === 'pending'}
-	<div class="my-8">
-		<img class="size-64" src={qrCodeUrl} alt="QR Code" />
-	</div>
+	{#if qrCodeUrl}
+		<div class="my-8">
+			<img class="size-64" src={qrCodeUrl} alt="QR Code" />
+		</div>
+	{:else}
+		<LoaderCircleIcon class="animate-spin size-4" /> Connecting...
+	{/if}
 {:else if status === 'authenticated'}
 	<div class="my-8">
 		<span class="text-green-600 font-bold">Session authenticated!</span>
@@ -86,7 +94,7 @@
 			<label>
 				Active?
 
-				<input type="checkbox" bind:checked={session.active} onchange={updateSession2} />
+				<input type="checkbox" bind:checked={session.active} onchange={updateSession} />
 			</label>
 		</div>
 	{/if}

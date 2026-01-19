@@ -22,13 +22,15 @@ export const POST = async ({ request }) => {
 		if (!sessionState.bot) {
 			sessionState.bot = new WhatsAppSTTBot({
 				clientId: sessionToken,
-				onQrCode(qr) {
-					if (!qr) return
+				onParingCode({ qrCode }) {
+					if (!qrCode) return
 
 					messenger.emit('qrCode', {
-						value: qr,
+						value: qrCode,
 					})
 				},
+				// transcriptionApiBaseUrl: 'http://speeches:8000/v1',
+				transcriptionApiBaseUrl: 'http://localhost:8000/v1',
 				async getConfig() {
 					const session = await sessionStore.getOrThrow(sessionToken)
 

@@ -1,20 +1,32 @@
 import OpenAI from "openai"
 import WhatsAppWeb, { type Chat, type GroupChat } from "whatsapp-web.js"
 
-const { LocalAuth, MessageTypes, Client: WhatsAppWebClient } = WhatsAppWeb
+const {
+  RemoteAuth,
+  LocalAuth,
+  MessageTypes,
+  Client: WhatsAppWebClient,
+} = WhatsAppWeb
 
 export class WhatsAppSTTBot {
   #client: InstanceType<typeof WhatsAppWebClient>
   #openai: OpenAI
   #status: "disconnected" | "connecting" | "connected" = "disconnected"
 
+  // TODO: Target chat caching
+
   constructor(
     public readonly options: {
       clientId: string
-      onQrCode: (qr: string) => any
+      transcriptionApiBaseUrl: string
+      onParingCode: (
+        param:
+          | { qrCode: string; paringCode?: never }
+          | { paringCode: string; qrCode?: never },
+      ) => any
       /**
        * Called before processing each message.
-       * THe config is to be fetched from the database.
+       * The config is to be fetched from the database.
        */
       getConfig: () => Promise<{
         active: boolean
@@ -23,16 +35,16 @@ export class WhatsAppSTTBot {
         allowAudioMessages: boolean
       }>
       onDisconnected: () => any
-    }
+      // TODO: auth: ConstructorParameters<typeof RemoteAuth>[0]
+    },
   ) {
     this.#openai = new OpenAI({
-      // baseURL: "http://speaches:8000/v1",
-      baseURL: "http://localhost:8000/v1",
+      baseURL: this.options.transcriptionApiBaseUrl,
       apiKey: "-",
     })
 
     this.#client = new WhatsAppWebClient({
-      // TODO: RemoteAuth
+      // TODO: new RemoteAuth(this.options.auth)
       authStrategy: new LocalAuth({
         dataPath: ".auth",
         clientId: this.options.clientId,
@@ -61,12 +73,12 @@ export class WhatsAppSTTBot {
   }
 
   async createTranscriptionChat() {
-    const name = "Transcription Chat 📝"
+    const name = "📝 Memo Transcriptions"
 
     const chats = await this.getChats()
     const foundChat = chats.find(
       (chat) =>
-        isGroupChat(chat) && chat.participants.length > 0 && chat.name === name
+        isGroupChat(chat) && chat.participants.length > 0 && chat.name === name,
     )
     if (foundChat) return foundChat.id._serialized
 
@@ -78,14 +90,14 @@ export class WhatsAppSTTBot {
     // Send welcome message
     await this.#client.sendMessage(
       groupChatId,
-      `Hi! Hier wirst du die Transkriptionen deiner Voice Memos sehen. 🦆\n` +
+      `Hi! 🦆 Hier wirst du die Transkriptionen deiner Voice Memos sehen.\n` +
         `⚙️ Verlier den Link für deine Einstellungen nicht:\n\n` +
         `https://example.com/s/${this.options.clientId}`,
       // TODO: real link
       {
         // HACK: see below
         sendSeen: false,
-      }
+      },
     )
 
     return groupChatId
@@ -96,22 +108,26 @@ export class WhatsAppSTTBot {
 
     const { promise, resolve } = Promise.withResolvers()
 
+    // await client.requestPairingCode(phoneNumber)
+
     // When the client is ready, run this code (only once)
     client.once("ready", async () => {
       // this.#targetChat = await client.getChatById(config.targetChatId)
       // console.log("Target chat is set.")
 
-      console.log("Ready for action 🚀")
+      console.log("Bot ready 🚀")
 
       this.#status = "connected"
+
+      // TODO: Send hello message
 
       resolve()
     })
 
     // When the client received QR-Code
-    client.on("qr", async (qr) => {
+    client.on("qr", async (qrCode) => {
       this.#status = "connecting"
-      this.options.onQrCode(qr)
+      this.options.onParingCode({ qrCode })
     })
 
     // TODO: "message" for only received messages

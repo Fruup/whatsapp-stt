@@ -6,6 +6,15 @@ import { botStore } from '../bot'
 import { error } from '@sveltejs/kit'
 import { db } from '$lib/db'
 
+export const checkSession = query(
+	v.object({
+		sessionToken: v.string(),
+	}),
+	async ({ sessionToken }) => {
+		await sessionStore.getOrThrow(sessionToken)
+	},
+)
+
 export const getSession = query(
 	v.object({
 		sessionToken: v.string(),
